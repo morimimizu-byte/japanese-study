@@ -10,7 +10,7 @@
     <title>にほんごべんきょう</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=9" />
+    <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body>
     <div class="app-shell">
@@ -111,15 +111,21 @@
             <span class="kana" id="promptText">あ</span>
             <span class="answer hidden" id="answerText">a</span>
             <span class="hint" id="hintText">Choose the romaji</span>
+            <span class="feedback-mark hidden" id="feedbackMark" aria-hidden="true">○</span>
           </div>
 
           <div class="choice-grid" id="choiceGrid"></div>
 
           <form class="typing-form hidden" id="typingForm" autocomplete="off">
             <label class="sr-only" for="typingInput">Type answer</label>
-            <input id="typingInput" inputmode="latin" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Type romaji" />
-            <button class="primary" type="submit">Check</button>
+            <input id="typingInput" inputmode="latin" autocapitalize="none" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="Type romaji" />
+            <button class="primary" type="submit">こたえる</button>
           </form>
+
+          <div class="spelling-feedback hidden" id="spellingFeedback">
+            <p><span>あなた</span><strong id="userAnswerText"></strong></p>
+            <p><span>こたえ</span><strong id="correctAnswerText"></strong></p>
+          </div>
 
           <button class="secondary next-button hidden" id="nextButton">Next</button>
         </section>
@@ -165,6 +171,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
   </body>
 </html>

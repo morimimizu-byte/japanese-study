@@ -75,6 +75,8 @@ const CATEGORY_WEIGHTS = {
   learning: 6,
   strong: 1
 };
+const AUTO_ADVANCE_MS = 650;
+let autoAdvanceTimer = null;
 
 const state = {
   screen: "home",
@@ -113,9 +115,13 @@ const els = {
   promptText: document.querySelector("#promptText"),
   answerText: document.querySelector("#answerText"),
   hintText: document.querySelector("#hintText"),
+  feedbackMark: document.querySelector("#feedbackMark"),
   choiceGrid: document.querySelector("#choiceGrid"),
   typingForm: document.querySelector("#typingForm"),
   typingInput: document.querySelector("#typingInput"),
+  spellingFeedback: document.querySelector("#spellingFeedback"),
+  userAnswerText: document.querySelector("#userAnswerText"),
+  correctAnswerText: document.querySelector("#correctAnswerText"),
   nextButton: document.querySelector("#nextButton"),
   kanaGrid: document.querySelector("#kanaGrid"),
   resultCorrect: document.querySelector("#resultCorrect"),
@@ -135,6 +141,9 @@ els.startSessionButton.addEventListener("click", startSession);
 els.resultsHomeButton.addEventListener("click", () => showScreen("setup"));
 els.studyAgainButton.addEventListener("click", startSession);
 els.nextButton.addEventListener("click", nextQuestion);
+els.typingInput.addEventListener("focus", () => {
+  setTimeout(() => els.typingInput.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
+});
 els.settingsButton.addEventListener("click", () => els.settingsDialog.showModal());
 els.resetButton.addEventListener("click", resetProgress);
 
@@ -198,6 +207,7 @@ function createEmptySession(length) {
     missed: 0,
     answered: false,
     lastCorrect: false,
+    feedback: "idle",
     selectedAnswer: "",
     current: null,
     choices: [],
@@ -222,12 +232,14 @@ function showScreen(screen) {
 }
 
 function startSession() {
+  clearAutoAdvance();
   state.session = createEmptySession(state.sessionLength);
   showScreen("quiz");
   nextQuestion();
 }
 
 function nextQuestion() {
+  clearAutoAdvance();
   if (state.session.asked >= state.session.length) {
     showResults();
     return;
@@ -239,6 +251,7 @@ function nextQuestion() {
   state.session.choices = makeChoices(current, cards);
   state.session.answered = false;
   state.session.lastCorrect = false;
+  state.session.feedback = "idle";
   state.session.selectedAnswer = "";
   state.session.asked += 1;
   state.session.recentIds = [current.id, ...state.session.recentIds].slice(0, 3);
@@ -280,9 +293,11 @@ function gradeCurrent(wasCorrect) {
 
   state.session.answered = true;
   state.session.lastCorrect = wasCorrect;
+  state.session.feedback = wasCorrect ? "correct" : "wrong";
   state.session.correct += wasCorrect ? 1 : 0;
   state.session.missed += wasCorrect ? 0 : 1;
   renderQuiz();
+  if (wasCorrect) scheduleAutoAdvance();
 }
 
 function renderSetup() {
@@ -296,7 +311,10 @@ function renderQuiz() {
   const answer = getAnswer(card);
   const answeredCount = state.session.correct + state.session.missed;
   const answerLabel = state.direction === "kana-to-romaji" ? "romaji" : "kana";
+  const isTyping = state.mode === "typing";
+  const isWrong = state.session.feedback === "wrong";
 
+  els.quizScreen.classList.toggle("spelling-mode", isTyping);
   els.deckName.textContent = deckLabel(state.deck);
   els.questionCounter.textContent = `${state.session.asked} / ${state.session.length} もんめ`;
   renderCategoryBadge(getCardCategory(card));
@@ -312,14 +330,27 @@ function renderQuiz() {
     : state.mode === "choice"
       ? `${answerLabel}をえらんで`
       : `${answerLabel}をいれて`;
+  renderFeedbackMark();
 
   els.choiceGrid.classList.toggle("hidden", state.mode !== "choice");
   els.typingForm.classList.toggle("hidden", state.mode !== "typing");
-  els.nextButton.classList.toggle("hidden", !state.session.answered);
+  els.spellingFeedback.classList.toggle("hidden", !(isTyping && isWrong));
+  els.userAnswerText.textContent = state.session.selectedAnswer || " ";
+  els.correctAnswerText.textContent = answer;
+  els.nextButton.classList.toggle("hidden", !isWrong);
   els.nextButton.textContent = state.session.asked >= state.session.length ? "けっか" : "つぎへ";
 
   renderChoices(answer);
   renderTypingInput();
+}
+
+function renderFeedbackMark() {
+  const isCorrect = state.session.feedback === "correct";
+  const isWrong = state.session.feedback === "wrong";
+  els.feedbackMark.classList.toggle("hidden", !isCorrect && !isWrong);
+  els.feedbackMark.classList.toggle("correct", isCorrect);
+  els.feedbackMark.classList.toggle("wrong", isWrong);
+  els.feedbackMark.textContent = isCorrect ? "○" : "×";
 }
 
 function renderChoices(answer) {
@@ -349,16 +380,14 @@ function renderChoices(answer) {
 
 function renderTypingInput() {
   const expectingRomaji = state.direction === "kana-to-romaji";
-  els.typingInput.value = state.session.answered ? els.typingInput.value : "";
+  els.typingInput.value = state.session.answered ? state.session.selectedAnswer : "";
   els.typingInput.disabled = state.session.answered;
   els.typingInput.placeholder = expectingRomaji ? "romajiをいれて" : "かなをいれて";
   els.typingInput.inputMode = expectingRomaji ? "latin" : "text";
-  if (state.mode === "typing" && !state.session.answered) {
-    setTimeout(() => els.typingInput.focus(), 0);
-  }
 }
 
 function showResults() {
+  clearAutoAdvance();
   const answered = state.session.correct + state.session.missed;
   const accuracy = answered ? Math.round((state.session.correct / answered) * 100) : 0;
   els.resultsTitle.textContent = `${state.session.correct} / ${state.session.length}`;
@@ -366,6 +395,20 @@ function showResults() {
   els.resultMissed.textContent = state.session.missed;
   els.resultAccuracy.textContent = `${accuracy}%`;
   showScreen("results");
+}
+
+function scheduleAutoAdvance() {
+  clearAutoAdvance();
+  autoAdvanceTimer = window.setTimeout(() => {
+    autoAdvanceTimer = null;
+    nextQuestion();
+  }, AUTO_ADVANCE_MS);
+}
+
+function clearAutoAdvance() {
+  if (!autoAdvanceTimer) return;
+  window.clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = null;
 }
 
 function setSessionLength(value) {
