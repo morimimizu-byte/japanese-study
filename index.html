@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6a7b8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="にほんごべんきょう" />
+    <title>にほんごべんきょう</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="styles.css?v=9" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">にほんごべんきょう</h1>
+        </div>
+        <button class="icon-button" id="settingsButton" aria-label="Open settings" title="Settings">
+          <span aria-hidden="true">⚙</span>
+        </button>
+      </header>
+
+      <main>
+        <section class="screen home-screen" id="homeScreen">
+          <button class="home-start" id="openKanaButton">
+            <span>ひらがな カタカナ</span>
+          </button>
+        </section>
+
+        <section class="screen setup-screen hidden" id="setupScreen">
+          <div class="section-heading">
+            <button class="text-button" id="setupBackButton">ホーム</button>
+          </div>
+
+          <div class="progress-card">
+            <div class="pie-chart" id="progressPie" role="img" aria-label="progress pie chart">
+              <span id="piePercent">0%</span>
+            </div>
+            <div class="pie-copy">
+              <h2 id="progressTitle">ひらがなのしんちょく</h2>
+              <p id="progressSummary">まだ 104 · れんしゅうちゅう 0 · とくい 0</p>
+              <div class="pie-legend">
+                <span><i class="legend-dot new"></i>あたらしい</span>
+                <span><i class="legend-dot learning"></i>れんしゅうちゅう</span>
+                <span><i class="legend-dot strong"></i>とくい</span>
+              </div>
+            </div>
+            <div class="combo-chart-grid" id="comboChartGrid"></div>
+          </div>
+
+          <div class="control-group">
+            <h2>もじ</h2>
+            <div class="segmented" aria-label="Deck">
+              <button class="segment active" data-deck="hiragana">ひらがな</button>
+              <button class="segment" data-deck="katakana">カタカナ</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h2>もんだいすう</h2>
+            <div class="length-row">
+              <button class="stepper" id="decreaseLength" aria-label="Decrease questions">−</button>
+              <input id="sessionLengthInput" type="number" min="5" max="100" step="5" value="10" inputmode="numeric" />
+              <button class="stepper" id="increaseLength" aria-label="Increase questions">+</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h2>クイズけいしき</h2>
+            <div class="segmented" aria-label="Quiz type">
+              <button class="segment active" data-mode="choice">4たく</button>
+              <button class="segment" data-mode="typing">つづり</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h2>だすほうこう</h2>
+            <div class="segmented" aria-label="Quiz direction">
+              <button class="segment active" data-direction="kana-to-romaji">かなからromaji</button>
+              <button class="segment" data-direction="romaji-to-kana">romajiからかな</button>
+            </div>
+          </div>
+
+          <button class="primary full-width" id="startSessionButton">はじめる</button>
+
+          <details class="chart-details">
+            <summary>ひらがな/かたかなひょう</summary>
+            <div class="chart-tabs" aria-label="Reference chart">
+              <button class="text-button active" data-chart="hiragana">ひらがな</button>
+              <button class="text-button" data-chart="katakana">カタカナ</button>
+            </div>
+            <div class="kana-grid" id="kanaGrid"></div>
+          </details>
+        </section>
+
+        <section class="screen quiz-screen hidden" id="quizScreen" aria-live="polite">
+          <div class="card-meta">
+            <span id="deckName">ひらがな</span>
+            <span id="questionCounter">1 / 10 もんめ</span>
+          </div>
+          <span class="category-badge" id="categoryBadge">あたらしい</span>
+
+          <div class="session-progress" aria-label="Session progress">
+            <div id="sessionProgressFill"></div>
+          </div>
+
+          <div class="quiz-card">
+            <span class="kana" id="promptText">あ</span>
+            <span class="answer hidden" id="answerText">a</span>
+            <span class="hint" id="hintText">Choose the romaji</span>
+          </div>
+
+          <div class="choice-grid" id="choiceGrid"></div>
+
+          <form class="typing-form hidden" id="typingForm" autocomplete="off">
+            <label class="sr-only" for="typingInput">Type answer</label>
+            <input id="typingInput" inputmode="latin" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Type romaji" />
+            <button class="primary" type="submit">Check</button>
+          </form>
+
+          <button class="secondary next-button hidden" id="nextButton">Next</button>
+        </section>
+
+        <section class="screen results-screen hidden" id="resultsScreen">
+          <div class="results-card">
+            <p class="eyebrow">おつかれさま</p>
+            <h2 id="resultsTitle">8 / 10</h2>
+            <div class="stats-grid">
+              <div>
+                <strong id="resultCorrect">0</strong>
+                <span>せいかい</span>
+              </div>
+              <div>
+                <strong id="resultMissed">0</strong>
+                <span>まちがい</span>
+              </div>
+              <div>
+                <strong id="resultAccuracy">0%</strong>
+                <span>せいかいりつ</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="secondary" id="resultsHomeButton">もどる</button>
+            <button class="primary" id="studyAgainButton">もういちど</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="settingsDialog">
+      <form method="dialog" class="dialog-card">
+        <div class="dialog-header">
+          <h2>Settings</h2>
+          <button class="icon-button" value="close" aria-label="Close settings">×</button>
+        </div>
+
+        <div class="settings-actions">
+          <button type="button" class="danger" id="resetButton">Reset progress</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js?v=9"></script>
+  </body>
+</html>
