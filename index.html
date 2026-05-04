@@ -10,7 +10,7 @@
     <title>にほんごべんきょう</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=13" />
   </head>
   <body>
     <div class="app-shell">
@@ -97,9 +97,12 @@
         </section>
 
         <section class="screen quiz-screen hidden" id="quizScreen" aria-live="polite">
-          <div class="card-meta">
-            <span id="deckName">ひらがな</span>
-            <span id="questionCounter">1 / 10 もんめ</span>
+          <div class="quiz-top-row">
+            <div class="card-meta">
+              <span id="deckName">ひらがな</span>
+              <span id="questionCounter">1 / 10 もんめ</span>
+            </div>
+            <button class="text-button quit-quiz-button" id="quitQuizButton" type="button">クイズをやめる</button>
           </div>
           <span class="category-badge" id="categoryBadge">あたらしい</span>
 
@@ -119,15 +122,15 @@
           <form class="typing-form hidden" id="typingForm" autocomplete="off">
             <label class="sr-only" for="typingInput">Type answer</label>
             <input id="typingInput" inputmode="latin" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="Type romaji" />
-            <button class="primary" type="submit">こたえる</button>
+            <button class="primary" id="submitAnswerButton" type="submit">こたえる</button>
           </form>
+
+          <button class="secondary next-button hidden" id="nextButton">つぎへ</button>
 
           <div class="spelling-feedback hidden" id="spellingFeedback">
             <p><span>あなた</span><strong id="userAnswerText"></strong></p>
             <p><span>こたえ</span><strong id="correctAnswerText"></strong></p>
           </div>
-
-          <button class="secondary next-button hidden" id="nextButton">Next</button>
         </section>
 
         <section class="screen results-screen hidden" id="resultsScreen">
@@ -171,6 +174,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
   </body>
 </html>

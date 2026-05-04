@@ -108,6 +108,7 @@ const els = {
   sessionLengthInput: document.querySelector("#sessionLengthInput"),
   decreaseLength: document.querySelector("#decreaseLength"),
   increaseLength: document.querySelector("#increaseLength"),
+  quitQuizButton: document.querySelector("#quitQuizButton"),
   deckName: document.querySelector("#deckName"),
   questionCounter: document.querySelector("#questionCounter"),
   categoryBadge: document.querySelector("#categoryBadge"),
@@ -119,6 +120,7 @@ const els = {
   choiceGrid: document.querySelector("#choiceGrid"),
   typingForm: document.querySelector("#typingForm"),
   typingInput: document.querySelector("#typingInput"),
+  submitAnswerButton: document.querySelector("#submitAnswerButton"),
   spellingFeedback: document.querySelector("#spellingFeedback"),
   userAnswerText: document.querySelector("#userAnswerText"),
   correctAnswerText: document.querySelector("#correctAnswerText"),
@@ -141,9 +143,7 @@ els.startSessionButton.addEventListener("click", startSession);
 els.resultsHomeButton.addEventListener("click", () => showScreen("setup"));
 els.studyAgainButton.addEventListener("click", startSession);
 els.nextButton.addEventListener("click", nextQuestion);
-els.typingInput.addEventListener("focus", () => {
-  setTimeout(() => els.typingInput.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
-});
+els.quitQuizButton.addEventListener("click", quitQuiz);
 els.settingsButton.addEventListener("click", () => els.settingsDialog.showModal());
 els.resetButton.addEventListener("click", resetProgress);
 
@@ -183,12 +183,27 @@ els.decreaseLength.addEventListener("click", () => setSessionLength(state.sessio
 els.increaseLength.addEventListener("click", () => setSessionLength(state.sessionLength + 5));
 els.sessionLengthInput.addEventListener("change", () => setSessionLength(Number(els.sessionLengthInput.value)));
 
+["pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
+  els.submitAnswerButton.addEventListener(
+    eventName,
+    (event) => {
+      if (state.mode !== "typing") return;
+      event.preventDefault();
+      submitTypingAnswer();
+    },
+    { passive: false }
+  );
+});
+
+els.submitAnswerButton.addEventListener("click", (event) => {
+  if (state.mode !== "typing") return;
+  event.preventDefault();
+  submitTypingAnswer();
+});
+
 els.typingForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const answer = normalizeAnswer(els.typingInput.value);
-  if (!answer || state.session.answered) return;
-  state.session.selectedAnswer = els.typingInput.value.trim();
-  gradeCurrent(answer === normalizeAnswer(getAnswer(state.session.current)));
+  submitTypingAnswer();
 });
 
 if ("serviceWorker" in navigator) {
@@ -238,6 +253,12 @@ function startSession() {
   state.session.shouldFocusInput = state.mode === "typing";
   showScreen("quiz");
   nextQuestion();
+}
+
+function quitQuiz() {
+  clearAutoAdvance();
+  state.session = createEmptySession(state.sessionLength);
+  showScreen("setup");
 }
 
 function nextQuestion() {
@@ -301,6 +322,14 @@ function gradeCurrent(wasCorrect) {
   state.session.missed += wasCorrect ? 0 : 1;
   renderQuiz();
   if (wasCorrect) scheduleAutoAdvance();
+}
+
+function submitTypingAnswer() {
+  if (state.mode !== "typing" || !state.session.current) return;
+  const answer = normalizeAnswer(els.typingInput.value);
+  if (!answer || state.session.answered) return;
+  state.session.selectedAnswer = els.typingInput.value.trim();
+  gradeCurrent(answer === normalizeAnswer(getAnswer(state.session.current)));
 }
 
 function renderSetup() {
@@ -386,6 +415,7 @@ function renderTypingInput() {
   const isWrong = state.session.feedback === "wrong";
   els.typingInput.value = state.session.answered ? state.session.selectedAnswer : "";
   els.typingInput.disabled = isWrong;
+  els.submitAnswerButton.disabled = isWrong;
   els.typingInput.placeholder = expectingRomaji ? "romajiをいれて" : "かなをいれて";
   els.typingInput.inputMode = expectingRomaji ? "latin" : "text";
   if (state.mode === "typing" && state.session.shouldFocusInput && !isWrong) {
