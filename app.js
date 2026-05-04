@@ -204,11 +204,12 @@ function createEmptySession(length) {
     length,
     asked: 0,
     correct: 0,
-    missed: 0,
-    answered: false,
-    lastCorrect: false,
-    feedback: "idle",
-    selectedAnswer: "",
+  missed: 0,
+  answered: false,
+  lastCorrect: false,
+  feedback: "idle",
+  shouldFocusInput: false,
+  selectedAnswer: "",
     current: null,
     choices: [],
     recentIds: []
@@ -234,6 +235,7 @@ function showScreen(screen) {
 function startSession() {
   clearAutoAdvance();
   state.session = createEmptySession(state.sessionLength);
+  state.session.shouldFocusInput = state.mode === "typing";
   showScreen("quiz");
   nextQuestion();
 }
@@ -252,6 +254,7 @@ function nextQuestion() {
   state.session.answered = false;
   state.session.lastCorrect = false;
   state.session.feedback = "idle";
+  state.session.shouldFocusInput = state.mode === "typing";
   state.session.selectedAnswer = "";
   state.session.asked += 1;
   state.session.recentIds = [current.id, ...state.session.recentIds].slice(0, 3);
@@ -380,10 +383,17 @@ function renderChoices(answer) {
 
 function renderTypingInput() {
   const expectingRomaji = state.direction === "kana-to-romaji";
+  const isWrong = state.session.feedback === "wrong";
   els.typingInput.value = state.session.answered ? state.session.selectedAnswer : "";
-  els.typingInput.disabled = state.session.answered;
+  els.typingInput.disabled = isWrong;
   els.typingInput.placeholder = expectingRomaji ? "romajiをいれて" : "かなをいれて";
   els.typingInput.inputMode = expectingRomaji ? "latin" : "text";
+  if (state.mode === "typing" && state.session.shouldFocusInput && !isWrong) {
+    state.session.shouldFocusInput = false;
+    requestAnimationFrame(() => {
+      els.typingInput.focus({ preventScroll: true });
+    });
+  }
 }
 
 function showResults() {
