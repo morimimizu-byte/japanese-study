@@ -471,7 +471,7 @@ function renderProgressPie() {
   );
   els.piePercent.textContent = `${strongPercent}%`;
   els.progressTitle.textContent = `${deckLabel(state.deck)}ぜんたい`;
-  els.progressSummary.textContent = `あたらしい ${stats.new} · れんしゅうちゅう ${stats.learning} · とくい ${stats.strong}`;
+  els.progressSummary.textContent = `4つのクイズ: あたらしい ${stats.new} · れんしゅうちゅう ${stats.learning} · とくい ${stats.strong}`;
 }
 
 function renderComboCharts() {
@@ -504,20 +504,20 @@ function applyPieBackground(element, stats) {
 
 function getOverallProgressCategories(deck = state.deck) {
   const cards = getDeckCards(deck);
-  return cards.reduce(
-    (stats, card) => {
-      const categories = STUDY_COMBINATIONS.map((combo) => getCardCategory(card, combo.mode, combo.direction, deck));
-      if (categories.every((category) => category === "strong")) {
-        stats.strong += 1;
-      } else if (categories.every((category) => category === "new")) {
-        stats.new += 1;
-      } else {
-        stats.learning += 1;
-      }
-      return stats;
-    },
-    { total: cards.length, new: 0, learning: 0, strong: 0 }
-  );
+  const stats = {
+    total: cards.length * STUDY_COMBINATIONS.length,
+    new: 0,
+    learning: 0,
+    strong: 0
+  };
+
+  cards.forEach((card) => {
+    STUDY_COMBINATIONS.forEach((combo) => {
+      stats[getCardCategory(card, combo.mode, combo.direction, deck)] += 1;
+    });
+  });
+
+  return stats;
 }
 
 function getComboProgressCategories(deck = state.deck, mode = state.mode, direction = state.direction) {
