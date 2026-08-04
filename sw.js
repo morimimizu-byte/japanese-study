@@ -1,4 +1,4 @@
-const CACHE_NAME = "kana-kit-v30";
+const CACHE_NAME = "kana-kit-v32";
 const ASSETS = [
   "./",
   "index.html",

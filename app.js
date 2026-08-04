@@ -151,7 +151,9 @@ const els = {
   foundationBackButton: document.querySelector("#foundationBackButton"),
   foundationWordCount: document.querySelector("#foundationWordCount"),
   foundationStartedCount: document.querySelector("#foundationStartedCount"),
-  foundationProgressFill: document.querySelector("#foundationProgressFill"),
+  foundationProgressRing: document.querySelector("#foundationProgressRing"),
+  foundationLearningCount: document.querySelector("#foundationLearningCount"),
+  foundationStrongCount: document.querySelector("#foundationStrongCount"),
   themeBackButton: document.querySelector("#themeBackButton"),
   lessonBackButton: document.querySelector("#lessonBackButton"),
   posBackButton: document.querySelector("#posBackButton"),
@@ -1926,6 +1928,11 @@ function compactProgressRingMarkup(stats) {
   return `<span class="progress-ring compact-progress-ring" style="background:${progress.background}" role="img" aria-label="練習中 ${progress.practicing}語、覚えた ${progress.strong}語"><b>${progress.percent}%</b></span>`;
 }
 
+function compactProgressLegendMarkup(stats) {
+  const progress = vocabularyProgressBreakdown(stats);
+  return `<span class="compact-progress-legend"><small><i class="legend-learning"></i>${rubyMarkup("練習中", "れんしゅうちゅう")} ${progress.practicing}</small><small><i class="legend-strong"></i>${rubyMarkup("覚えた", "おぼえた")} ${progress.strong}</small></span>`;
+}
+
 function renderVocabularyDashboard() {
   const allCards = getAllVocabularyCards();
   const stats = vocabularyLearningStats(allCards);
@@ -1957,9 +1964,15 @@ function getFoundationCards() {
 
 function renderFoundationEntry() {
   const stats = vocabularyLearningStats(getFoundationCards());
-  const percent = Math.round((stats.introduced / (stats.total || 1)) * 100);
-  els.foundationStartedCount.textContent = `${percent}%`;
-  els.foundationProgressFill.style.width = `${percent}%`;
+  const progress = vocabularyProgressBreakdown(stats);
+  els.foundationStartedCount.textContent = `${progress.percent}%`;
+  els.foundationLearningCount.textContent = String(progress.practicing);
+  els.foundationStrongCount.textContent = String(progress.strong);
+  els.foundationProgressRing.style.background = progress.background;
+  els.foundationProgressRing.setAttribute(
+    "aria-label",
+    `基礎表現の進捗。練習中 ${progress.practicing}語、覚えた ${progress.strong}語`
+  );
 }
 
 function renderFoundationScreen() {
@@ -2076,7 +2089,6 @@ function renderStageGrid() {
   VOCABULARY_COURSE.stages.forEach((stage, index) => {
     const cards = getAllVocabularyCards().filter((card) => card.learningType === "word" && card.stageId === stage.id);
     const stats = vocabularyLearningStats(cards);
-    const percent = Math.round((stats.introduced / (cards.length || 1)) * 100);
     const button = document.createElement("button");
     button.className = "stage-card";
     button.type = "button";
@@ -2086,7 +2098,8 @@ function renderStageGrid() {
         <strong>${rubyMarkup(stage.title, stage.reading)}</strong>
         <span>${cards.length}${rubyMarkup("語", "ご")} · ${stage.lessonIds.length}${rubyMarkup("課", "か")}</span>
       </span>
-      <span class="stage-progress"><b>${percent}%</b><i><em style="width:${percent}%"></em></i></span>`;
+      ${compactProgressLegendMarkup(stats)}
+      ${compactProgressRingMarkup(stats)}`;
     button.addEventListener("click", () => openCollection("stage", stage.id));
     els.stageGrid.appendChild(button);
   });

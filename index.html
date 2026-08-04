@@ -16,7 +16,7 @@
     <title>にほんごべんきょう · N5単語</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=33" />
+    <link rel="stylesheet" href="styles.css?v=35" />
   </head>
   <body>
     <div class="app-shell">
@@ -190,7 +190,8 @@
           <div class="dashboard-panel" id="courseTabPanel">
             <button class="foundation-entry-card" id="openFoundationButton" type="button">
               <span><strong><ruby class="ui-ruby">基礎表現<rt>きそひょうげん</rt></ruby></strong><em id="foundationEntryCount"><ruby class="ui-ruby">基礎<rt>きそ</rt></ruby>コース</em></span>
-              <span class="stage-progress"><b id="foundationStartedCount">0%</b><i><em id="foundationProgressFill"></em></i></span>
+              <span class="compact-progress-legend"><small><i class="legend-learning"></i><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby> <em id="foundationLearningCount">0</em></small><small><i class="legend-strong"></i><ruby class="ui-ruby">覚えた<rt>おぼえた</rt></ruby> <em id="foundationStrongCount">0</em></small></span>
+              <span class="progress-ring compact-progress-ring" id="foundationProgressRing" role="img" aria-label="基礎表現の進捗"><b id="foundationStartedCount">0%</b></span>
               <i aria-hidden="true">→</i>
             </button>
             <div class="stage-grid" id="stageGrid"></div>
@@ -589,8 +590,8 @@
       </form>
     </dialog>
 
-    <script src="vocabulary-data.js?v=33"></script>
-    <script src="course-data.js?v=33"></script>
-    <script src="app.js?v=33"></script>
+    <script src="vocabulary-data.js?v=35"></script>
+    <script src="course-data.js?v=35"></script>
+    <script src="app.js?v=35"></script>
   </body>
 </html>
