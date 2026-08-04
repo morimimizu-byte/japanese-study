@@ -1,13 +1,16 @@
-const CACHE_NAME = "kana-kit-v14";
+const CACHE_NAME = "kana-kit-v30";
 const ASSETS = [
   "./",
   "index.html",
   "styles.css",
   "app.js",
+  "vocabulary-data.js",
+  "course-data.js",
   "manifest.json",
   "icon.svg",
   "icon-192.png",
-  "icon-512.png"
+  "icon-512.png",
+  "og-n5-vocabulary-v3.png"
 ];
 
 self.addEventListener("install", (event) => {

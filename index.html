@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,10 +7,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="にほんごべんきょう" />
-    <title>にほんごべんきょう</title>
+    <meta name="description" content="JLPT N5の語彙を、単語総合・品詞別・復習・単語帳で学べる日本語学習サイト。" />
+    <meta property="og:title" content="にほんごべんきょう · N5単語" />
+    <meta property="og:description" content="単語総合、品詞別学習、苦手復習、検索できる単語帳でN5語彙を学べます。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nihongo-study-vocab.morimimizu.chatgpt.site/og-n5-vocabulary-v3.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>にほんごべんきょう · N5単語</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=33" />
   </head>
   <body>
     <div class="app-shell">
@@ -25,9 +31,15 @@
 
       <main>
         <section class="screen home-screen" id="homeScreen">
-          <button class="home-start" id="openKanaButton">
-            <span>ひらがな カタカナ</span>
-          </button>
+          <div class="home-grid">
+            <button class="home-start kana-study-card" id="openKanaButton">
+              <span>ひらがな カタカナ</span>
+            </button>
+            <button class="home-start vocabulary-study-card" id="openVocabularyButton">
+              <span><ruby class="ui-ruby">単語<rt>たんご</rt></ruby></span>
+              <small class="construction-label"><ruby class="ui-ruby">工事中<rt>こうじちゅう</rt></ruby></small>
+            </button>
+          </div>
         </section>
 
         <section class="screen setup-screen hidden" id="setupScreen">
@@ -96,23 +108,424 @@
           </details>
         </section>
 
+        <section class="screen setup-screen hidden" id="vocabularyLevelScreen">
+          <div class="section-heading">
+            <button class="text-button" id="vocabularyLevelBackButton">ホーム</button>
+            <span class="setup-summary"><ruby class="ui-ruby">単語学習<rt>たんごがくしゅう</rt></ruby></span>
+          </div>
+
+          <div class="course-intro-card">
+            <h2><ruby class="ui-ruby">学習<rt>がくしゅう</rt></ruby>するレベルを<ruby class="ui-ruby">選ぶ<rt>えらぶ</rt></ruby></h2>
+          </div>
+
+          <div class="level-grid" id="levelGrid">
+            <button class="level-card available" id="openN5Button" type="button">
+              <span class="level-badge">N5</span>
+              <span>
+                <strong id="n5LevelWordCount">N5<ruby class="ui-ruby">語彙<rt>ごい</rt></ruby></strong>
+              </span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button class="level-card" type="button" disabled><span class="level-badge">N4</span><span><strong><ruby class="ui-ruby">準備中<rt>じゅんびちゅう</rt></ruby></strong></span></button>
+            <button class="level-card" type="button" disabled><span class="level-badge">N3</span><span><strong><ruby class="ui-ruby">準備中<rt>じゅんびちゅう</rt></ruby></strong></span></button>
+            <button class="level-card" type="button" disabled><span class="level-badge">N2</span><span><strong><ruby class="ui-ruby">準備中<rt>じゅんびちゅう</rt></ruby></strong></span></button>
+            <button class="level-card" type="button" disabled><span class="level-badge">N1</span><span><strong><ruby class="ui-ruby">準備中<rt>じゅんびちゅう</rt></ruby></strong></span></button>
+          </div>
+        </section>
+
+        <section class="screen course-screen hidden" id="vocabularyDashboardScreen">
+          <div class="section-heading">
+            <button class="text-button" id="vocabularyDashboardBackButton"><ruby class="ui-ruby">レベル選択<rt>せんたく</rt></ruby></button>
+            <span class="setup-summary" id="n5DashboardWordCount">JLPT N5</span>
+          </div>
+
+          <div class="course-progress-card vocabulary-overview-card">
+            <div class="course-progress-copy">
+              <h2>N5 <ruby class="ui-ruby">単語<rt>たんご</rt></ruby></h2>
+              <p id="courseProgressSummary">787<ruby class="ui-ruby">語<rt>ご</rt></ruby></p>
+            </div>
+            <div class="progress-ring course-progress-ring" id="courseProgressPie" role="img" aria-label="N5単語の進捗">
+              <span id="courseProgressPercent">0%</span>
+            </div>
+            <div class="progress-ring-legend">
+              <span><i class="legend-learning"></i><b><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby></b><em id="courseLearningCount">0</em></span>
+              <span><i class="legend-strong"></i><b><ruby class="ui-ruby">覚えた<rt>おぼえた</rt></ruby></b><em id="courseStrongCount">0</em></span>
+            </div>
+          </div>
+
+          <nav class="course-tabs" aria-label="N5単語の学習項目">
+            <button class="course-tab active" data-vocabulary-tab="course"><ruby class="ui-ruby">単語総合<rt>たんごそうごう</rt></ruby></button>
+            <button class="course-tab" data-vocabulary-tab="pos"><ruby class="ui-ruby">品詞別<rt>ひんしべつ</rt></ruby></button>
+            <button class="course-tab" data-vocabulary-tab="review"><ruby class="ui-ruby">復習<rt>ふくしゅう</rt></ruby></button>
+            <button class="course-tab" data-vocabulary-tab="library"><ruby class="ui-ruby">単語帳<rt>たんごちょう</rt></ruby></button>
+          </nav>
+
+          <div class="dashboard-panel hidden" id="todayTabPanel">
+            <section class="today-study-card">
+              <div>
+                <span class="continue-label" id="todayStageLabel"><ruby class="ui-ruby">基礎表現<rt>きそひょうげん</rt></ruby></span>
+                <h2 id="todayStudyTitle"><ruby class="ui-ruby">新しい単語<rt>あたらしいたんご</rt></ruby>を8<ruby class="ui-ruby">語<rt>ご</rt></ruby></h2>
+                <p id="todayStudySummary"><ruby class="ui-ruby">使用頻度<rt>しようひんど</rt></ruby>の<ruby class="ui-ruby">高い順<rt>たかいじゅん</rt></ruby>に<ruby class="ui-ruby">学びます<rt>まなびます</rt></ruby>。</p>
+              </div>
+              <div class="length-row compact-length-row">
+                <button class="stepper" id="decreaseTodayLength" aria-label="新しく学ぶ語数を減らす">−</button>
+                <input id="todaySessionLengthInput" type="number" min="5" max="20" step="1" value="8" inputmode="numeric" aria-label="新しく学ぶ語数" />
+                <button class="stepper" id="increaseTodayLength" aria-label="新しく学ぶ語数を増やす">+</button>
+              </div>
+              <button class="primary full-width" id="startTodayButton" type="button"><ruby class="ui-ruby">学習<rt>がくしゅう</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+            </section>
+            <div class="learning-state-grid" aria-label="学習状況">
+              <div><span><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby></span><strong id="introducedCount">0</strong></div>
+              <div><span><ruby class="ui-ruby">習得途中<rt>しゅうとくとちゅう</rt></ruby></span><strong id="learningCount">0</strong></div>
+              <div><span><ruby class="ui-ruby">復習待ち<rt>ふくしゅうまち</rt></ruby></span><strong id="todayDueCount">0</strong></div>
+              <div><span><ruby class="ui-ruby">定着<rt>ていちゃく</rt></ruby></span><strong id="strongCount">0</strong></div>
+            </div>
+            <button class="continue-card" id="continueLessonButton" type="button">
+              <span class="continue-label"><ruby class="ui-ruby">次の課<rt>つぎのか</rt></ruby></span>
+              <strong id="continueLessonTitle"><ruby class="ui-ruby">基礎表現<rt>きそひょうげん</rt></ruby> 1</strong>
+              <small id="continueLessonSummary">8<ruby class="ui-ruby">語<rt>ご</rt></ruby> · まだ<ruby class="ui-ruby">学習<rt>がくしゅう</rt></ruby>していません</small>
+            </button>
+          </div>
+
+          <div class="dashboard-panel" id="courseTabPanel">
+            <button class="foundation-entry-card" id="openFoundationButton" type="button">
+              <span><strong><ruby class="ui-ruby">基礎表現<rt>きそひょうげん</rt></ruby></strong><em id="foundationEntryCount"><ruby class="ui-ruby">基礎<rt>きそ</rt></ruby>コース</em></span>
+              <span class="stage-progress"><b id="foundationStartedCount">0%</b><i><em id="foundationProgressFill"></em></i></span>
+              <i aria-hidden="true">→</i>
+            </button>
+            <div class="stage-grid" id="stageGrid"></div>
+            <div class="hidden" id="themeGrid"></div>
+          </div>
+
+          <div class="dashboard-panel hidden" id="posTabPanel">
+            <div class="panel-heading-copy">
+              <h2><ruby class="ui-ruby">品詞別<rt>ひんしべつ</rt></ruby></h2>
+            </div>
+            <div class="pos-level-grid" id="posLevelGrid"></div>
+          </div>
+
+          <div class="dashboard-panel hidden" id="reviewTabPanel">
+            <div class="review-summary-card">
+              <span><ruby class="ui-ruby">選択中<rt>せんたくちゅう</rt></ruby>の<ruby class="ui-ruby">復習<rt>ふくしゅう</rt></ruby></span>
+              <strong id="dueReviewCount">0</strong>
+              <small><ruby class="ui-ruby">語<rt>ご</rt></ruby></small>
+            </div>
+            <div class="review-mode-grid" aria-label="復習する語">
+              <button class="review-mode-card active" type="button" data-review-mode="difficult">
+                <span><ruby class="ui-ruby">苦手<rt>にがて</rt></ruby>な<ruby class="ui-ruby">語<rt>ご</rt></ruby></span>
+                <strong id="difficultReviewCount">0</strong>
+                <small>クイズで間違いが多い語</small>
+              </button>
+              <button class="review-mode-card" type="button" data-review-mode="recent">
+                <span><ruby class="ui-ruby">最近<rt>さいきん</rt></ruby>の<ruby class="ui-ruby">間違い<rt>まちがい</rt></ruby></span>
+                <strong id="recentReviewCount">0</strong>
+                <small>最近のクイズで間違えた語</small>
+              </button>
+            </div>
+            <div class="control-group">
+              <h2><ruby class="ui-ruby">問題数<rt>もんだいすう</rt></ruby></h2>
+              <div class="length-row">
+                <button class="stepper" id="decreaseReviewLength" aria-label="復習問題数を減らす">−</button>
+                <input id="reviewSessionLengthInput" type="number" min="5" max="100" step="5" value="20" inputmode="numeric" />
+                <button class="stepper" id="increaseReviewLength" aria-label="復習問題数を増やす">+</button>
+              </div>
+            </div>
+            <button class="primary full-width" id="startReviewButton" type="button"><ruby class="ui-ruby">復習<rt>ふくしゅう</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+            <p class="empty-state hidden" id="reviewEmptyState"><ruby class="ui-ruby">復習<rt>ふくしゅう</rt></ruby>する語はまだありません。まずはカード学習やクイズを進めましょう。</p>
+          </div>
+
+          <div class="dashboard-panel hidden" id="libraryTabPanel">
+            <div class="library-search-card">
+              <label for="librarySearch"><ruby class="ui-ruby">単語帳<rt>たんごちょう</rt></ruby>を<ruby class="ui-ruby">検索<rt>けんさく</rt></ruby></label>
+              <input id="librarySearch" type="search" placeholder="日本語・読み・意味" autocomplete="off" />
+              <div class="library-filter-grid">
+                <select id="libraryTypeFilter" aria-label="語彙の種類"></select>
+                <select id="libraryStageFilter" aria-label="優先段階"></select>
+                <select id="libraryWordTypeFilter" aria-label="品詞"></select>
+                <select id="libraryThemeFilter" aria-label="テーマ"></select>
+                <select id="libraryStatusFilter" aria-label="学習状態"></select>
+                <select id="librarySort" aria-label="並び順">
+                  <option value="priority">おすすめ順</option>
+                  <option value="kana">読み順</option>
+                </select>
+              </div>
+            </div>
+            <div class="library-result-heading"><strong id="libraryResultCount">0</strong><span><ruby class="ui-ruby">語<rt>ご</rt></ruby></span></div>
+            <div class="vocabulary-library-list" id="libraryList"></div>
+            <p class="library-limit-note hidden" id="libraryLimitNote"><ruby class="ui-ruby">最初<rt>さいしょ</rt></ruby>の120<ruby class="ui-ruby">語<rt>ご</rt></ruby>を<ruby class="ui-ruby">表示<rt>ひょうじ</rt></ruby>しています。<ruby class="ui-ruby">検索<rt>けんさく</rt></ruby>やフィルターで<ruby class="ui-ruby">絞って<rt>しぼって</rt></ruby>ください。</p>
+            <div class="library-action-row">
+              <button class="secondary" id="studyLibraryResultsButton" type="button"><ruby class="ui-ruby">表示中<rt>ひょうじちゅう</rt></ruby>から<ruby class="ui-ruby">学ぶ<rt>まなぶ</rt></ruby></button>
+              <button class="secondary" id="quizLibraryResultsButton" type="button"><ruby class="ui-ruby">表示中<rt>ひょうじちゅう</rt></ruby>からクイズ</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen course-screen hidden" id="foundationScreen">
+          <div class="section-heading">
+            <button class="text-button" id="foundationBackButton"><ruby class="ui-ruby">単語総合<rt>たんごそうごう</rt></ruby>へ</button>
+            <span class="setup-summary" id="foundationWordCount">0<ruby class="ui-ruby">語<rt>ご</rt></ruby></span>
+          </div>
+          <div class="foundation-hero">
+            <h2><ruby class="ui-ruby">基礎表現<rt>きそひょうげん</rt></ruby></h2>
+            <p><ruby class="ui-ruby">役割<rt>やくわり</rt></ruby>の<ruby class="ui-ruby">異なる<rt>ことなる</rt></ruby><ruby class="ui-ruby">言葉<rt>ことば</rt></ruby>を、9つの<ruby class="ui-ruby">種類<rt>しゅるい</rt></ruby>に<ruby class="ui-ruby">分けて<rt>わけて</rt></ruby><ruby class="ui-ruby">学びます<rt>まなびます</rt></ruby>。</p>
+          </div>
+          <div class="special-course-grid" id="specialCourseGrid"></div>
+        </section>
+
+        <section class="screen course-screen hidden" id="posLevelScreen">
+          <div class="section-heading">
+            <button class="text-button" id="posLevelBackButton"><ruby class="ui-ruby">品詞別<rt>ひんしべつ</rt></ruby>へ</button>
+            <span class="setup-summary" id="posLevelTotalCount">0<ruby class="ui-ruby">語<rt>ご</rt></ruby></span>
+          </div>
+          <div class="pos-hero">
+            <h2 id="posLevelTitle"></h2>
+          </div>
+          <div class="pos-category-choice-grid" id="posCategoryChoiceGrid"></div>
+        </section>
+
+        <section class="screen course-screen hidden" id="themeScreen">
+          <div class="section-heading">
+            <button class="text-button" id="themeBackButton">N5 <ruby class="ui-ruby">単語<rt>たんご</rt></ruby></button>
+            <span class="setup-summary" id="themeWordCount">0<ruby class="ui-ruby">語<rt>ご</rt></ruby></span>
+          </div>
+          <div class="theme-hero">
+            <p class="eyebrow" id="themeEyebrow"><ruby class="ui-ruby">テーマ<rt>てーま</rt></ruby></p>
+            <h2 id="themeTitle"></h2>
+            <p id="themeDescription"></p>
+            <div class="linear-progress" aria-label="Theme progress"><div id="themeProgressFill"></div></div>
+            <small id="themeProgressSummary"></small>
+          </div>
+          <div class="lesson-grid" id="lessonGrid"></div>
+          <div class="theme-practice-card">
+            <div>
+              <h2><ruby class="ui-ruby">テーマ練習<rt>てーまれんしゅう</rt></ruby></h2>
+              <p>このテーマから<ruby class="ui-ruby">問題<rt>もんだい</rt></ruby>をミックスします。</p>
+            </div>
+            <div class="length-row">
+              <button class="stepper" id="decreaseThemeLength" aria-label="テーマ問題数を減らす">−</button>
+              <input id="themeSessionLengthInput" type="number" min="5" max="100" step="5" value="20" inputmode="numeric" />
+              <button class="stepper" id="increaseThemeLength" aria-label="テーマ問題数を増やす">+</button>
+            </div>
+            <button class="primary full-width" id="startThemeButton" type="button"><ruby class="ui-ruby">テーマ練習<rt>てーまれんしゅう</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+          </div>
+        </section>
+
+        <section class="screen course-screen hidden" id="lessonScreen">
+          <div class="section-heading">
+            <button class="text-button" id="lessonBackButton"><ruby class="ui-ruby">単語総合<rt>たんごそうごう</rt></ruby>へ</button>
+            <span class="setup-summary" id="lessonPosition">1 / 1</span>
+          </div>
+          <div class="lesson-hero">
+            <p class="eyebrow" id="lessonThemeTitle"></p>
+            <h2 id="lessonTitle"></h2>
+            <p id="lessonSummary"></p>
+          </div>
+          <div class="lesson-study-summary">
+            <div>
+              <span><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby></span>
+              <strong id="lessonViewedCount">0 / 10</strong>
+            </div>
+            <div>
+              <span><ruby class="ui-ruby">得意<rt>とくい</rt></ruby></span>
+              <strong id="lessonStrongCount">0 / 10</strong>
+            </div>
+          </div>
+          <div class="collection-word-list lesson-session-word-list" id="lessonWordList"></div>
+          <button class="primary full-width" id="startLessonStudyButton" type="button"><ruby class="ui-ruby">単語学習<rt>たんごがくしゅう</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+          <button class="secondary full-width" id="startLessonButton" type="button"><ruby class="ui-ruby">この課<rt>このか</rt></ruby>のクイズを<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+        </section>
+
+        <section class="screen course-screen hidden" id="posScreen">
+          <div class="section-heading">
+            <button class="text-button" id="posBackButton">N5 <ruby class="ui-ruby">単語<rt>たんご</rt></ruby></button>
+            <span class="setup-summary" id="posTotalCount">0<ruby class="ui-ruby">語<rt>ご</rt></ruby></span>
+          </div>
+          <div class="pos-hero">
+            <h2 id="posScreenTitle"></h2>
+            <p id="posScreenDescription"></p>
+            <div class="pos-stat-row">
+              <span><b id="posViewedCount">0</b><small><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby></small></span>
+              <span><b id="posLearningCount">0</b><small><ruby class="ui-ruby">復習待ち<rt>ふくしゅうまち</rt></ruby></small></span>
+              <span><b id="posStrongCount">0</b><small><ruby class="ui-ruby">定着<rt>ていちゃく</rt></ruby></small></span>
+            </div>
+          </div>
+          <div class="control-group" id="collectionBatchControl">
+            <h2><ruby class="ui-ruby">一度<rt>いちど</rt></ruby>に<ruby class="ui-ruby">学ぶ語<rt>まなぶご</rt></ruby></h2>
+            <div class="length-row">
+              <button class="stepper" id="decreasePosLength" aria-label="学習語数を減らす">−</button>
+              <input id="posBatchLengthInput" type="number" min="5" max="50" step="1" value="8" inputmode="numeric" />
+              <button class="stepper" id="increasePosLength" aria-label="学習語数を増やす">+</button>
+            </div>
+          </div>
+          <div class="lesson-grid collection-lesson-grid" id="collectionLessonGrid"></div>
+          <div class="pos-theme-breakdown" id="posThemeBreakdown"></div>
+          <div class="collection-word-list hidden" id="collectionWordList"></div>
+          <div class="collection-action-row" id="collectionActionRow">
+            <button class="primary full-width" id="startPosStudyButton" type="button"><ruby class="ui-ruby">カード学習<rt>かーどがくしゅう</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby></button>
+            <button class="secondary full-width" id="startPosQuizButton" type="button"><ruby class="ui-ruby">確認<rt>かくにん</rt></ruby>クイズ</button>
+          </div>
+        </section>
+
+        <section class="screen course-screen hidden" id="wordStudyScreen">
+          <div class="section-heading">
+            <button class="text-button" id="wordStudyBackButton"><ruby class="ui-ruby">学習元<rt>がくしゅうもと</rt></ruby>へ</button>
+            <span class="setup-summary" id="wordStudyPosition">1 / 10</span>
+          </div>
+          <div class="linear-progress" aria-label="Word study progress"><div id="wordStudyProgressFill"></div></div>
+          <article class="word-study-card">
+            <div class="study-card-kicker hidden" id="wordStudyKicker"></div>
+            <div class="word-study-japanese" id="wordStudyJapanese"></div>
+            <p class="recall-prompt hidden" id="wordStudyRecallPrompt"></p>
+            <button class="primary reveal-answer-button" id="wordStudyRevealButton" type="button"><ruby class="ui-ruby">意味<rt>いみ</rt></ruby>を<ruby class="ui-ruby">見る<rt>みる</rt></ruby></button>
+            <div class="word-study-details hidden" id="wordStudyDetails">
+              <p class="word-study-english" id="wordStudyEnglish"></p>
+              <div class="word-pos-card" id="wordStudyPosCard">
+                <strong id="wordStudyPos"></strong>
+              </div>
+              <div class="word-special-detail hidden" id="wordStudySpecialDetail"></div>
+              <div class="verb-conjugation-card hidden" id="wordStudyConjugations"></div>
+              <div class="word-family-card hidden" id="wordStudyRelatedForms"></div>
+              <div class="word-family-card hidden" id="wordStudyRelatedWords"></div>
+              <section class="study-aspect usage-study-aspect">
+                <span class="study-aspect-label"><ruby class="ui-ruby">使い方<rt>つかいかた</rt></ruby></span>
+                <div class="usage-example-list" id="wordStudyExamples"></div>
+              </section>
+            </div>
+          </article>
+          <div class="study-navigation">
+            <button class="secondary" id="previousStudyWordButton" type="button"><ruby class="ui-ruby">前の単語<rt>まえのたんご</rt></ruby></button>
+            <button class="primary" id="nextStudyWordButton" type="button"><ruby class="ui-ruby">次の単語<rt>つぎのたんご</rt></ruby></button>
+          </div>
+          <button class="secondary full-width" id="studyBatchQuizButton" type="button"><ruby class="ui-ruby">学習中<rt>がくしゅうちゅう</rt></ruby>の<ruby class="ui-ruby">単語<rt>たんご</rt></ruby>をクイズ</button>
+        </section>
+
+        <section class="screen setup-screen hidden" id="vocabularySetupScreen">
+          <div class="section-heading">
+            <button class="text-button" id="vocabularyBackButton">N5 <ruby class="ui-ruby">単語<rt>たんご</rt></ruby></button>
+            <span class="setup-summary" id="vocabularySetupWordCount"><ruby class="ui-ruby">全単語<rt>ぜんたんご</rt></ruby></span>
+          </div>
+
+          <div class="progress-card">
+            <div class="pie-chart" id="vocabularyProgressPie" role="img" aria-label="vocabulary progress pie chart">
+              <span id="vocabularyPiePercent">0%</span>
+            </div>
+            <div class="pie-copy">
+              <h2 id="vocabularyProgressTitle">セット 1の<ruby class="ui-ruby">進捗<rt>しんちょく</rt></ruby></h2>
+              <p id="vocabularyProgressSummary">
+                <ruby class="ui-ruby">新しい<rt>あたらしい</rt></ruby> 98 ·
+                <ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby> 0 ·
+                <ruby class="ui-ruby">得意<rt>とくい</rt></ruby> 0
+              </p>
+              <div class="pie-legend">
+                <span><i class="legend-dot new"></i><ruby class="ui-ruby">新しい<rt>あたらしい</rt></ruby></span>
+                <span><i class="legend-dot learning"></i><ruby class="ui-ruby">練習中<rt>れんしゅうちゅう</rt></ruby></span>
+                <span><i class="legend-dot strong"></i><ruby class="ui-ruby">得意<rt>とくい</rt></ruby></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h2>セットを<ruby class="ui-ruby">選ぶ<rt>えらぶ</rt></ruby></h2>
+            <div class="vocabulary-category-grid" aria-label="Vocabulary category">
+              <button class="segment vocabulary-set-button active" data-vocab-category="set-1">
+                <strong>セット 1</strong><small>98語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-2">
+                <strong>セット 2</strong><small>97語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-3">
+                <strong>セット 3</strong><small>98語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-4">
+                <strong>セット 4</strong><small>98語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-5">
+                <strong>セット 5</strong><small>98語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-6">
+                <strong>セット 6</strong><small>97語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-7">
+                <strong>セット 7</strong><small>98語</small>
+              </button>
+              <button class="segment vocabulary-set-button" data-vocab-category="set-8">
+                <strong>セット 8</strong><small>97語</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h2><ruby class="ui-ruby">問題数<rt>もんだいすう</rt></ruby></h2>
+            <div class="length-row">
+              <button class="stepper" id="decreaseVocabularyLength" aria-label="問題数を減らす">−</button>
+              <input
+                id="vocabularySessionLengthInput"
+                type="number"
+                min="5"
+                max="98"
+                step="1"
+                value="98"
+                inputmode="numeric"
+                aria-label="単語クイズの問題数"
+              />
+              <button class="stepper" id="increaseVocabularyLength" aria-label="問題数を増やす">+</button>
+            </div>
+          </div>
+
+          <div class="quiz-rule-card" aria-label="Quiz rules">
+            <strong id="vocabularyQuizLength">98<ruby class="ui-ruby">問<rt>もん</rt></ruby></strong>
+            <span><ruby class="ui-ruby">日本語<rt>にほんご</rt></ruby> → English</span>
+            <span>4<ruby class="ui-ruby">択<rt>たく</rt></ruby></span>
+          </div>
+
+          <button class="primary full-width" id="startVocabularySessionButton">
+            98<ruby class="ui-ruby">問<rt>もん</rt></ruby>を<ruby class="ui-ruby">始める<rt>はじめる</rt></ruby>
+          </button>
+
+          <details class="chart-details">
+            <summary id="vocabularyListSummary">
+              <ruby class="ui-ruby">単語<rt>たんご</rt></ruby>リスト ·
+              98<ruby class="ui-ruby">語<rt>ご</rt></ruby>
+            </summary>
+            <div class="vocabulary-list" id="vocabularyList"></div>
+          </details>
+
+          <p class="source-note">
+            JLPTは<ruby class="ui-ruby">公式<rt>こうしき</rt></ruby>の
+            <ruby class="ui-ruby">単語<rt>たんご</rt></ruby>リストを
+            <ruby class="ui-ruby">公開<rt>こうかい</rt></ruby>していません。この<span id="sourceWordCount">N5<ruby class="ui-ruby">語彙<rt>ごい</rt></ruby></span>は
+            <a href="https://jlptsensei.com/jlpt-n5-vocabulary-list/" target="_blank" rel="noreferrer">JLPT Sensei</a>、
+            <a href="https://www.tanos.co.uk/jlpt/jlpt5/" target="_blank" rel="noreferrer">Tanos</a>、
+            <a href="https://www.mlcjapanese.co.jp/Download/Vocabulary_of_JLPT_N5.pdf" target="_blank" rel="noreferrer">MLC</a>、
+            <a href="https://japanesetest4you.com/jlpt-n5-vocabulary-list/" target="_blank" rel="noreferrer">Japanesetest4you</a>
+            のN5リストを<ruby class="ui-ruby">照合<rt>しょうごう</rt></ruby>し、<ruby class="ui-ruby">近い形<rt>ちかいかたち</rt></ruby>を一つの<ruby class="ui-ruby">学習語<rt>がくしゅうご</rt></ruby>にまとめています。<ruby class="ui-ruby">漢字表記<rt>かんじひょうき</rt></ruby>は
+            <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project" target="_blank" rel="noreferrer">JMdict</a>
+            と<ruby class="ui-ruby">照合<rt>しょうごう</rt></ruby>しています。
+          </p>
+        </section>
+
         <section class="screen quiz-screen hidden" id="quizScreen" aria-live="polite">
           <div class="quiz-top-row">
             <div class="card-meta">
               <span id="deckName">ひらがな</span>
               <span id="questionCounter">1 / 10 もんめ</span>
             </div>
-            <button class="text-button quit-quiz-button" id="quitQuizButton" type="button">クイズをやめる</button>
+            <button class="text-button quit-quiz-button" id="quitQuizButton" type="button">
+              クイズを<ruby class="ui-ruby">終了<rt>しゅうりょう</rt></ruby>
+            </button>
           </div>
-          <span class="category-badge" id="categoryBadge">あたらしい</span>
+          <span class="category-badge" id="categoryBadge"><ruby class="ui-ruby">新しい<rt>あたらしい</rt></ruby></span>
 
           <div class="session-progress" aria-label="Session progress">
             <div id="sessionProgressFill"></div>
           </div>
 
           <div class="quiz-card">
-            <span class="kana" id="promptText">あ</span>
+            <div class="prompt-ruby">
+              <span class="kana" id="promptText">あ</span>
+            </div>
             <span class="answer hidden" id="answerText">a</span>
+            <span class="context-hint hidden" id="contextHint"></span>
             <span class="hint" id="hintText">Choose the romaji</span>
             <span class="feedback-mark hidden" id="feedbackMark" aria-hidden="true">○</span>
           </div>
@@ -122,10 +535,10 @@
           <form class="typing-form hidden" id="typingForm" autocomplete="off">
             <label class="sr-only" for="typingInput">Type answer</label>
             <input id="typingInput" inputmode="latin" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="Type romaji" />
-            <button class="primary" id="submitAnswerButton" type="submit">こたえる</button>
+            <button class="primary" id="submitAnswerButton" type="submit"><ruby class="ui-ruby">答える<rt>こたえる</rt></ruby></button>
           </form>
 
-          <button class="secondary next-button hidden" id="nextButton">つぎへ</button>
+          <button class="secondary next-button hidden" id="nextButton"><ruby class="ui-ruby">次へ<rt>つぎへ</rt></ruby></button>
 
           <div class="spelling-feedback hidden" id="spellingFeedback">
             <p><span>あなた</span><strong id="userAnswerText"></strong></p>
@@ -135,27 +548,29 @@
 
         <section class="screen results-screen hidden" id="resultsScreen">
           <div class="results-card">
-            <p class="eyebrow">おつかれさま</p>
+            <p class="eyebrow"><ruby class="ui-ruby">お疲れ様<rt>おつかれさま</rt></ruby></p>
             <h2 id="resultsTitle">8 / 10</h2>
             <div class="stats-grid">
               <div>
                 <strong id="resultCorrect">0</strong>
-                <span>せいかい</span>
+                <span><ruby class="ui-ruby">正解<rt>せいかい</rt></ruby></span>
               </div>
               <div>
                 <strong id="resultMissed">0</strong>
-                <span>まちがい</span>
+                <span><ruby class="ui-ruby">間違い<rt>まちがい</rt></ruby></span>
               </div>
               <div>
                 <strong id="resultAccuracy">0%</strong>
-                <span>せいかいりつ</span>
+                <span><ruby class="ui-ruby">正解率<rt>せいかいりつ</rt></ruby></span>
               </div>
             </div>
           </div>
 
-          <div class="action-row">
-            <button class="secondary" id="resultsHomeButton">もどる</button>
-            <button class="primary" id="studyAgainButton">もういちど</button>
+          <div class="action-row results-actions">
+            <button class="secondary" id="resultsHomeButton"><ruby class="ui-ruby">戻る<rt>もどる</rt></ruby></button>
+            <button class="primary" id="studyAgainButton">もう<ruby class="ui-ruby">一度<rt>いちど</rt></ruby></button>
+            <button class="secondary hidden" id="missedWordsButton"><ruby class="ui-ruby">間違えた単語<rt>まちがえたたんご</rt></ruby></button>
+            <button class="primary hidden" id="nextLessonButton"><ruby class="ui-ruby">次の課<rt>つぎのか</rt></ruby></button>
           </div>
         </section>
       </main>
@@ -174,6 +589,8 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=14"></script>
+    <script src="vocabulary-data.js?v=33"></script>
+    <script src="course-data.js?v=33"></script>
+    <script src="app.js?v=33"></script>
   </body>
 </html>

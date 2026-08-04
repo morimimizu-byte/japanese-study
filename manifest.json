@@ -1,7 +1,7 @@
 {
   "name": "にほんごべんきょう",
   "short_name": "にほんご",
-  "description": "A personal hiragana and katakana flashcard app.",
+  "description": "A personal Japanese study app for kana and a curated JLPT N5 vocabulary curriculum.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#fff7f6",
